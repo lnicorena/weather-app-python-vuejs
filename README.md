@@ -7,27 +7,40 @@ Vue.js SPA served over Flask microframework
 * axios: 0.19.0
 
 
-## Build Setup
+## Front-end setup
 
 ``` bash
-# install front-end
+
 cd client
+
 yarn install
 
-# serve with hot reload at localhost:8080
+# Compiles and hot-reloads for development at localhost:8080
 yarn serve
 
-# build for production/Flask with minification
+# Compiles and minifies for production
 yarn build
 
+# Run front-end tests
+yarn test:unit
+yarn test:e2e
+```
 
-# install back-end
-cd ../server
+## Back-end setup
+
+``` bash
+cd server
+
+# Create python virtual env 
 virtualenv -p python venv
+
+# Activate virtual env
 source venv/bin/activate
+
+# Install project requirements
 pip install -r requirements.txt
-cd ..
 
 # serve back-end at localhost:5000
 FLASK_APP=app.py flask run
+
 ```
