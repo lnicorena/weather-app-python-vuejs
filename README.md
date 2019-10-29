@@ -13,6 +13,10 @@ Vue.js SPA served over Flask microframework
 
 cd client
 
+# Rename the .env file
+mv .env-example .env
+
+# Install project dependencies
 yarn install
 
 # Compiles and hot-reloads for development at localhost:8080
