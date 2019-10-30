@@ -6,9 +6,11 @@
         v-model="address"
         :data="suggestions"
         :minMatchingChars="0"
+        @hit="getLocation()"
+        @keyup.enter.native="getLocation()"
       />
+      <label class="text-danger small">{{ errorMessage }}</label>
     </b-form-group>
-    {{ address }}
     <b-button @click="getLocation()" block variant="success"
       >show me the current temperature</b-button
     >
@@ -24,11 +26,10 @@ export default {
   components: { VueBootstrapTypeahead },
   data() {
     return {
-      gkey: process.env.VUE_APP_GOOGLE_API_KEY,
+      gkey: process.env.GOOGLE_API_KEY,
       address: "",
-      suggestions: ["Canada", "USA", "Mexico"],
-      postal_code: "",
-      msg: "."
+      suggestions: [],
+      errorMessage: ""
     };
   },
   computed: {
@@ -39,44 +40,63 @@ export default {
   created() {
     this.debouncedQuery = _.debounce(this.getSuggestions, 500);
   },
+  mounted() {
+    this.getSuggestions();
+  },
   watch: {
-    address: function(neww, old) {
-      console.log(neww, old);
+    address: function() {
+      // Get the text from the input when user stops typing
       this.debouncedQuery();
     }
   },
   methods: {
     getLocation() {
-      let url = `https://maps.googleapis.com/maps/api/geocode/json?key=${this.gkey}&address=${this.encoded_address}&sensor=false"`;
-
-      this.$axios.get(url).then(data => {
-        console.log(data);
-        this.postal_code = this.getPostalCode(data.data);
-        if (this.postal_code != "") {
-          this.$emit("postalCodeInserted", this.postal_code);
-        }
-      });
-    },
-    getPostalCode(json) {
-      console.log("result", json);
-      // Sem resultados
-      if (json["results"].length == 0) {
-        return "";
-      }
-      let ad = json["results"][0]["address_components"];
-      for (let key in ad) {
-        if (ad[key]["types"].indexOf("postal_code") != -1) {
-          return ad[key]["long_name"];
-        }
-      }
-
-      // endereco incompleto
-      return "";
+      this.$axios
+        .get(
+          process.env.VUE_APP_API_URL +
+            `/temperature?address=${this.encoded_address}`
+        )
+        .then(data => {
+          console.log("then", data);
+          if (data.data.status == "OK") {
+            this.$emit("updateTemperatureBox", data.data.result);
+            this.errorMessage = "";
+          } else {
+            this.errorMessage = this.formatErrors(data.data.errors);
+          }
+        })
+        .catch(error => {
+          if (error.response && error.response.data.errors) {
+            this.errorMessage = this.formatErrors(error.response.data.errors);
+          } else {
+            this.errorMessage = this.formatErrors(error.message);
+          }
+        });
     },
 
     getSuggestions() {
-      console.log(this.address);
-      this.suggestions = [this.address];
+      this.$axios
+        .get(process.env.VUE_APP_API_URL + `/search?q=${this.address}`)
+        .then(data => {
+          if (data.data.status == "OK") {
+            this.suggestions = data.data.result;
+          } else {
+            this.errorMessage = this.formatErrors(data.data.errors);
+          }
+        })
+        .catch(error => {
+          console.log("error", error);
+          if (error.response && error.response.data.errors) {
+            this.errorMessage = this.formatErrors(error.response.data.errors);
+          }
+        });
+    },
+
+    formatErrors(errors) {
+      return (
+        "Some error occuried in the request. Details:\n" +
+        (typeof errors == Array ? errors.join(";\n") : errors)
+      );
     }
   }
 };

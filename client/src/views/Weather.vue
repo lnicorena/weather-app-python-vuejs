@@ -4,11 +4,15 @@
       <b-row>
         <b-col>
           <weather-address
-            @postalCodeInserted="updateTemperature"
+            @updateTemperatureBox="updateTemperature"
           ></weather-address>
         </b-col>
         <b-col align="center">
-          <weather-box ref="box"></weather-box>
+          <weather-box
+            ref="box"
+            :temperature="temperature"
+            :location="location"
+          ></weather-box>
         </b-col>
       </b-row>
     </b-container>
@@ -25,9 +29,16 @@ export default {
     WeatherAddress,
     WeatherBox
   },
+  data() {
+    return {
+      temperature: "",
+      location: ""
+    };
+  },
   methods: {
-    updateTemperature(postal_code) {
-      this.$refs.box.loadTemperature(postal_code);
+    updateTemperature(payload) {
+      this.temperature = payload.temperature;
+      this.location = payload.location;
     }
   }
 };

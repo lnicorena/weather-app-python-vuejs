@@ -25,6 +25,29 @@ def ping_pong():
     return jsonify('pong!')
 
 
+def prepare_response(success, data):
+    if success:
+        return jsonify({
+            'status': 'OK',
+            'result': data
+        })
+    else:
+        return jsonify({
+            'status': 'error',
+            'errors': data
+        })
+
+# query in the searches history
+@app.route('/search', methods=['GET'])
+def search():
+    # q = request.args.get('q')
+
+    return prepare_response(True, [
+        '515 N. State Street',
+        '459 Broadway'
+    ])
+
+
 def get_googleapi_response(address):
     global gapi_response
     url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + \
@@ -38,6 +61,7 @@ def get_googleapi_response(address):
     else:
         return 0
 
+
 def get_openweather_response(zipcode, country):
     global wapi_response
     # There is an open issue that doens't allow to search by zipcode from some places in other countries
@@ -48,10 +72,10 @@ def get_openweather_response(zipcode, country):
     wapi_response = requests.get(url)
 
     # @todo validate openweather request for errors
-    if(False):
-        return(-1)
-    else:
+    if "main" in wapi_response.json():
         return 0
+    else:
+        return -1
 
 
 def get_postal_code():
@@ -65,6 +89,7 @@ def get_postal_code():
             postal_code = result['long_name']
 
     return postal_code
+
 
 def get_location_name():
 
@@ -83,52 +108,50 @@ def get_location_name():
             region = comp["short_name"]
         elif "country" in comp["types"]:
             country = comp["short_name"]
-    
+
     return city, region, country
-    
+
 
 def get_temperature():
     temperature = wapi_response.json()
     return temperature["main"]["temp"]
-    
-    
 
 
 @app.route('/temperature', methods=['GET'])
 def temperature():
     address = request.args.get('address')
-    
-    # load google api response 
-    gres = get_googleapi_response(address)
-    if  gres == -1 :
-        return 'google api error'
 
-    # get zip code 
+    # load google api response
+    gres = get_googleapi_response(address)
+    if gres == -1:
+        return prepare_response(False, 'google api error')
+
+    # get zip code
     zipcode = get_postal_code()
     if zipcode == -1:
-        return 'invalid address'
+        return prepare_response(False, 'invalid address: zip code could not be found')
 
     # get location details
     city, region, country = get_location_name()
 
     if not city or not region or not country:
-        return 'invalid address'
+        return prepare_response(False, 'invalid address: location could not be found')
 
     # load open weather api response
     wres = get_openweather_response(zipcode, country)
-    if  wres == -1 :
-        return 'open weather api error'
-    
-    
+    if wres == -1:
+        return prepare_response(False, 'open weather api did not found the location to give the temperature')
+
     # get current temperature
     temp = get_temperature()
 
     # return the temperature and location name
     results = {
-        "temp" : temp,
-        "location" : city + ", " + region
+        "temperature": temp,
+        "location": city + ", " + region
     }
-    return jsonify(results)
+    return prepare_response(True, results)
+
 
 if __name__ == '__main__':
     app.run()

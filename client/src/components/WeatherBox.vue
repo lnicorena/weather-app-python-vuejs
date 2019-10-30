@@ -2,7 +2,7 @@
   <b-card
     bg-variant="info"
     text-variant="white"
-    :header="place"
+    :header="loc"
     class="text-center"
     style="max-width: 18rem;"
   >
@@ -13,26 +13,22 @@
 <script>
 export default {
   name: "WeatherBox",
-  data() {
-    return {
-      temp: "-",
-      place: "New York City, NY",
-      wkey: process.env.VUE_APP_OPENWEATHER_API_KEY,
-      zip: ""
-    };
-  },
-
-  methods: {
-    loadTemperature(postal_code) {
-      this.zip = postal_code;
-      let apiCall = `http://api.openweathermap.org/data/2.5/weather?zip=${this.zip}&units=imperial&APPID=${this.wkey}`;
-      this.$axios.get(apiCall).then(data => {
-        this.weatherCallback(data.data);
-      });
+  props: {
+    temperature: {
+      type: [String, Number],
+      required: true
     },
-    weatherCallback(weatherData) {
-      this.place = weatherData.name;
-      this.temp = weatherData.main.temp;
+    location: {
+      type: String,
+      required: true
+    }
+  },
+  computed: {
+    temp: function() {
+      return this.temperature ? Math.round(parseFloat(this.temperature)) : "-";
+    },
+    loc: function() {
+      return this.location ? this.location : "-";
     }
   }
 };
