@@ -47,4 +47,6 @@ pip install -r requirements.txt
 # serve back-end at localhost:5000
 FLASK_APP=app.py flask run
 
+# Compiles and hot-reloads for development at localhost:5000
+FLASK_APP=app.py FLASK_DEBUG=1 python -m flask run
 ```

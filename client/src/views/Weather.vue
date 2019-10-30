@@ -2,11 +2,13 @@
   <div class="app-group">
     <b-container>
       <b-row>
-        <b-col align="center">
-          <weather-address></weather-address>
+        <b-col>
+          <weather-address
+            @postalCodeInserted="updateTemperature"
+          ></weather-address>
         </b-col>
         <b-col align="center">
-          <weather-box></weather-box>
+          <weather-box ref="box"></weather-box>
         </b-col>
       </b-row>
     </b-container>
@@ -22,6 +24,11 @@ export default {
   components: {
     WeatherAddress,
     WeatherBox
+  },
+  methods: {
+    updateTemperature(postal_code) {
+      this.$refs.box.loadTemperature(postal_code);
+    }
   }
 };
 </script>
