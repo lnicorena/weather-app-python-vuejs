@@ -1,12 +1,13 @@
-from app import app
+from app import app, db, Searches, Temperatures
 from flask import jsonify, request
+from flask_sqlalchemy import SQLAlchemy
 import requests
 import json
+import os
 
 
-# change to environment variable?
-google_api_key = 'AIzaSyBe5NnvWyecZfVzrXV0XfgGQG0uRATuYfQ'
-openweather_api_key = '5461b7b4581b49127f32fe95aa5519d2'
+google_api_key = os.getenv("GOOGLE_API_KEY")
+openweather_api_key = os.getenv("OPENWEATHER_API_KEY")
 
 # sanity check route
 @app.route('/ping', methods=['GET'])
@@ -14,27 +15,72 @@ def ping_pong():
     return jsonify('pong!')
 
 
-def prepare_response(success, data):
-    if success:
-        return jsonify({
-            'status': 'OK',
-            'result': data
-        })
-    else:
+# function to insert/update an object in the db
+def db_persist(func):
+    def persist(*args, **kwargs):
+        func(*args, **kwargs)
+        try:
+            db.session.commit()
+            # db.logger.info("success calling db func: " + func.__name__)
+            return True
+        except SQLAlchemyError as e:
+            # db.logger.error(e.args)
+            db.session.rollback()
+            return False
+        finally:
+            db.session.close()
+    return persist
+
+@db_persist
+def insert_or_update(table_object):
+    return db.session.merge(table_object)
+    # db.session.add(s)
+    # db.session.commit()
+
+
+# prepare the api response and save to db if so
+# "status" codes:
+#   -1 : error, log in the searches table on db
+#   -2 : error
+#    1 : success, log in the searches and temperatures table on db
+def prepare_response(status, data, address, zipcode):
+    
+    if status < 0:
+        if status == -1:
+            s = Searches(address, 0, 'now()', zipcode, data)
+            insert_or_update(s)
+
         return jsonify({
             'status': 'error',
             'errors': data
         })
+    else:
+        if status == 1:
+            s = Searches(address, 1, 'now()', zipcode, "")
+            insert_or_update(s)
+
+            t = Temperatures(zipcode, data, 'now()')
+            insert_or_update(t)
+
+        return jsonify({
+            'status': 'OK',
+            'result': data
+        })
+
 
 # query in the searches history
 @app.route('/search', methods=['GET'])
 def search():
-    # q = request.args.get('q')
+    q = request.args.get('q')
 
-    return prepare_response(True, [
-        '515 N. State Street',
-        '459 Broadway'
-    ])
+    # query = db.select(Searches)
+    result = Searches.query(db.session, q)
+
+    return prepare_response(2, result, "", "")
+    # return prepare_response(2, [
+    #     '515 N. State Street',
+    #     '459 Broadway'
+    # ], "", "")
 
 
 def get_googleapi_response(address):
@@ -108,28 +154,31 @@ def get_temperature():
 
 @app.route('/temperature', methods=['GET'])
 def temperature():
-    address = request.args.get('address')
+    address = request.args.get('address', "")
+
+    if  address == "" :
+        return prepare_response(-2, 'address param must be passed', "invalid", "")
 
     # load google api response
     gres = get_googleapi_response(address)
     if gres == -1:
-        return prepare_response(False, 'google api error')
+        return prepare_response(-1, 'google api error', address, "")
 
     # get zip code
     zipcode = get_postal_code()
     if zipcode == -1:
-        return prepare_response(False, 'invalid address: zip code could not be found')
+        return prepare_response(-1, 'invalid address: zip code could not be found', address, zipcode)
 
     # get location details
     city, region, country = get_location_name()
 
     if not city or not region or not country:
-        return prepare_response(False, 'invalid address: location could not be found')
+        return prepare_response(-1, 'invalid address: location could not be found', address, zipcode)
 
     # load open weather api response
     wres = get_openweather_response(zipcode, country)
     if wres == -1:
-        return prepare_response(False, 'open weather api did not found the location to give the temperature')
+        return prepare_response(-1, 'open weather api did not found the location to give the temperature', address, zipcode)
 
     # get current temperature
     temp = get_temperature()
@@ -139,5 +188,5 @@ def temperature():
         "temperature": temp,
         "location": city + ", " + region
     }
-    return prepare_response(True, results)
+    return prepare_response(1, results, address, zipcode)
 
