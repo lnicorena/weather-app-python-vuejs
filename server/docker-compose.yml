@@ -6,14 +6,27 @@ services:
     build: ./flask
     container_name: flask
     restart: always
-    environment:
-      - APP_NAME=MyFlaskApp
+    env_file: .flask.env
     expose:
-      - 8080
+      - 5000
+    volumes: ['./flask:/app']
+    depends_on:
+      - postgres
 
   nginx:
     build: ./nginx
     container_name: nginx
     restart: always
     ports:
-      - "80:80"
+      - "8081:80"
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    env_file: .postgres.env
+    expose:
+      - 5432
+    ports: 
+      - "5432:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data

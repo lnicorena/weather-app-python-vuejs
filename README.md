@@ -35,6 +35,12 @@ yarn test:e2e
 ``` bash
 cd server
 
+# use docker to run the back-end
+docker-compose up --build
+
+
+# instead of ...
+
 # Create python virtual env 
 virtualenv -p python venv
 

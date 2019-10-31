@@ -9,3 +9,5 @@ venv
 
 # macOs
 .DS_Store
+
+postgres-data/*
