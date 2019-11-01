@@ -2,11 +2,37 @@
 
 ### Vue.js SPA served over Flask and PostgreSQL
 
-* Python: 3.8.0
-* Vue.js: 2.6.10
-* vue-router: 3.0.6
-* axios: 0.19.0
+Users can input an address and get the current temperature
 
+## Features
+
+### Temperature are searched by zipcode
+    
+Searches are cached on the DB so the server doesn't need to go again at the external API for the same address.
+    
+### The history of searches is showed to the user
+
+The app is loaded with the last 10 searches. As the user types the app shows the matched searches and, when user stops typing, the app reload the searches (suggestions) with the most recent 10 search that matches the address user have typed.
+
+### The temperature is stored on the DB
+
+We assumed that a temperature picked on the external API is valid for one hour. So we store this temperature on the database and if it is still valid we dont need to go at the external API again.
+
+### HTTP caching for temperature requests
+
+As we defined that a temperature is valid for 1 hour, the request that gets a temperature is given by our server with a max-age equals the remaining time the temperature has to still be valid. So the brower don't ask the server again until it is needed.
+
+### External APIs
+
+The application access `Google Geocoding` API and `Open Weather Map’s API` to get address and current temperature.
+
+### Testing
+
+We have unit tests on the back-end and on the front-end. The front-end also have integration tests.
+
+### Instructions 
+
+Follow the above instructions to get the app running.
 
 ## Front-end setup
 
