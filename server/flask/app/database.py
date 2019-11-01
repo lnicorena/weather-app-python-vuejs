@@ -53,8 +53,28 @@ class Temperatures(db.Model):
         return '<User %r>' % self.zipcode
 
 
+# function to insert/update an object in the db
+def db_persist(func):
+    def persist(*args, **kwargs):
+        func(*args, **kwargs)
+        try:
+            db.session.commit()
+            return True
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return False
+        finally:
+            db.session.close()
+    return persist
+
+
+@db_persist
+def insert_or_update(table_object):
+    return db.session.merge(table_object)
+
+
 dbstatus = False
-while dbstatus == False:
+while dbstatus is False:
     try:
         db.create_all()
         db.session.commit()
