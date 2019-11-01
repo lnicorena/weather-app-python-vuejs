@@ -1,5 +1,6 @@
 # Weather app 
-Vue.js SPA served over Flask microframework
+
+### Vue.js SPA served over Flask and PostgreSQL
 
 * Python: 3.8.0
 * Vue.js: 2.6.10
@@ -13,7 +14,7 @@ Vue.js SPA served over Flask microframework
 
 cd client
 
-# Rename the .env file
+# Rename the .env file and configure the API address and port
 mv .env-example .env
 
 # Install project dependencies
@@ -33,13 +34,22 @@ yarn test:e2e
 ## Back-end setup
 
 ``` bash
+
+# using docker-compose (recommended)
+
 cd server
 
-# use docker to run the back-end
+# build and run the containers (api will be available at: http://127.0.0.1:8081)
 docker-compose up --build
 
+# run tests
+docker exec -it flask py.test
 
-# instead of ...
+
+
+# or you can start the app manually
+
+cd server/flask
 
 # Create python virtual env 
 virtualenv -p python venv
@@ -58,4 +68,8 @@ FLASK_APP=app.py FLASK_DEBUG=1 python -m flask run
 
 # update/save requirements
 pip freeze > requirements.txt
+
+# run tests
+py.test
+
 ```

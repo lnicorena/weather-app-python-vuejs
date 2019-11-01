@@ -14,26 +14,29 @@ import os
 
 
 # sanity check route
-@app.route('/ping', methods=['GET'])
+@app.route('/', methods=['GET'])
 def ping_pong():
-    return jsonify('pong!')
+    return jsonify('It works!')
 
 
 # query in the searches history
 @app.route('/search', methods=['GET'])
 def search():
-    q = request.args.get('q')
+    q = request.args.get('q', False)
+    if q is False:
+        return prepare_response(utils.MSG_ERROR, 'query param must be passed')
+
     result = Searches.query(db.session, q)
     return prepare_response(utils.MSG_SUCCESS, result)
 
 
 @app.route('/temperature', methods=['GET'])
 def temperature():
-    address = request.args.get('address', "")
+    address = request.args.get('address', False)
 
     # error if param is not present
-    if  address == "" :
-        return prepare_response(utils.MSG_ERROR, 'address param must be passed', "invalid")
+    if not address:
+        return prepare_response(utils.MSG_ERROR, 'address param must be passed')
     
     ## check DATABASE for the ADDRESS
     history = db.session.query(Searches).filter(Searches.address.ilike(address)).first()
