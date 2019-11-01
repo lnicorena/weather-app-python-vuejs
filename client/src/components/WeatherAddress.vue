@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="address-search-group">
     <b-form-group>
       <vue-bootstrap-typeahead
         placeholder="Enter an address"
@@ -57,7 +57,7 @@ export default {
             `/temperature?address=${this.encoded_address}`
         )
         .then(data => {
-          console.log("then", data);
+          // console.log("then", data);
           if (data.data.status == "OK") {
             this.$emit("updateTemperatureBox", data.data.result);
             this.errorMessage = "";
@@ -85,7 +85,7 @@ export default {
           }
         })
         .catch(error => {
-          console.log("error", error);
+          // console.log("error", error);
           if (error.response && error.response.data.errors) {
             this.errorMessage = this.formatErrors(error.response.data.errors);
           }
