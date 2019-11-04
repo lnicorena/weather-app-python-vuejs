@@ -10,4 +10,8 @@ venv
 # macOs
 .DS_Store
 
+# database
 postgres-data/*
+
+# cache
+redis-data/*

@@ -1,4 +1,5 @@
 from app import app
+from app import cache
 from app.database import Searches
 from app.utils.request import prepare_response
 from app.utils import request as utils
@@ -11,6 +12,7 @@ from flask import request
 from flask import make_response
 import requests
 import os
+from datetime import datetime
 
 
 # sanity check route
@@ -38,7 +40,14 @@ def temperature():
     # error if param is not present
     if not address:
         return prepare_response(utils.MSG_ERROR, 'address param must be passed')
-    
+
+    # if the address is in cache, get the temperature from there 
+    if cache.get(address) is not None:
+        print ("request cached from redis")
+        return prepare_response(utils.MSG_SUCCESS, cache.get(address))
+        
+    TEMPERATURE_MAX_AGE = int(os.getenv("TEMPERATURE_MAX_AGE"))
+
     ## check DATABASE's search history for the given ADDRESS
     history = get_search_history(address)
 
@@ -60,6 +69,11 @@ def temperature():
                 # set http caching with the remaining time of the temperature stored
                 response.headers['Cache-Control'] = "max-age={}".format(temperature_ttl)
                 print('request cached from database. remaining time (seconds): {}'.format(temperature_ttl))
+
+
+                # set response in redis cache with the remaining time as max-age too
+                cache.set(address, temperature_value, timeout=temperature_ttl)
+
                 return response
 
         # otherwise return an error
@@ -104,12 +118,16 @@ def temperature():
         "temperature": temp,
         "location": location_name
     }
+    
+    # set the temperature in redis cache, in case of another client calls for the same address
+    cache.set(address, results, timeout=TEMPERATURE_MAX_AGE)
 
     # prepare the response and store it on the DB 
     response = make_response(prepare_response(utils.MSG_SUCCESS_DB, results, address, zipcode, country), 200)
 
     # also set the http cache to 1 hour
-    response.headers['Cache-Control'] = "max-age=3600"
+    response.headers['Cache-Control'] = "max-age={}".format(
+        TEMPERATURE_MAX_AGE)
 
     return response
 

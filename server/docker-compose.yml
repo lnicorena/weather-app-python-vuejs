@@ -12,6 +12,7 @@ services:
     volumes: ['./flask:/app']
     depends_on:
       - postgres
+      - redis
 
   nginx:
     build: ./nginx
@@ -30,3 +31,13 @@ services:
       - "5432:5432"
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis
+    container_name: redis
+    expose:
+      - 6379
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-data:/data

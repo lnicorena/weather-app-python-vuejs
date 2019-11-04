@@ -6,7 +6,7 @@ This application allow users to the current temperature for a place given an add
 
 ## Features
 
-### Temperature are searched by zipcode
+### Temperatures are searched by zipcode
     
 Searches are cached on the DB so the server doesn't need to go again at the external API for the same address.
     
@@ -21,6 +21,10 @@ We assumed that a temperature picked on the external API is valid for one hour. 
 ### HTTP caching for temperature requests
 
 As we defined that a temperature is valid for 1 hour, the request that gets a temperature is given by our server with a max-age equals the remaining time the temperature has to still be valid. So the brower don't ask the server again until it is needed.
+
+### Redis caching for temperature requests by address
+
+The application also has an in-memory cache layer for the temperature requests. So if another client requests for the same address, the server will imediatelly return the cached temperature. Again, only if it still valid.
 
 ### External APIs
 
@@ -84,6 +88,9 @@ source venv/bin/activate
 
 # Install project requirements
 pip install -r requirements.txt
+
+# Run postgres and redis instances and configure the env files
+.
 
 # serve back-end at localhost:5000
 FLASK_APP=app.py flask run
