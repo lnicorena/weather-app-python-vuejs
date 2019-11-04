@@ -37,6 +37,7 @@ def prepare_response(status, data, address="", zipcode="", country=""):
 
     result = {}
 
+    code = 200
     if status in [MSG_SUCCESS, MSG_SUCCESS_DB]:
         result['status'] = 'OK'
         result['result'] = data
@@ -44,5 +45,6 @@ def prepare_response(status, data, address="", zipcode="", country=""):
     if status in [MSG_ERROR, MSG_ERROR_DB]:
         result['status'] = 'error'
         result['errors'] = data
+        code = 400
 
-    return jsonify(result)
+    return jsonify(result), code

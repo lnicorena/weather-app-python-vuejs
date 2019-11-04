@@ -65,7 +65,7 @@ def temperature():
             # return the stored temperature if it is still valid. Otherwise, get from the weather API
             if temperature_ttl > 0:
                 response = make_response(prepare_response(
-                    utils.MSG_SUCCESS, temperature_value), 200)
+                    utils.MSG_SUCCESS, temperature_value)[0], 200)
                 # set http caching with the remaining time of the temperature stored
                 response.headers['Cache-Control'] = "max-age={}".format(temperature_ttl)
                 print('request cached from database. remaining time (seconds): {}'.format(temperature_ttl))
@@ -91,7 +91,7 @@ def temperature():
         # get zip code
         zipcode = API.gapi_get_postal_code()
         if not zipcode:
-            return prepare_response(utils.MSG_ERROR_DB, 'invalid address: zip code could not be found', address, zipcode)
+            return prepare_response(utils.MSG_ERROR_DB, 'invalid address: zipcode could not be found', address, zipcode)
 
         # get location details
         city, region, country = API.gapi_get_location_name()
@@ -123,7 +123,7 @@ def temperature():
     cache.set(address, results, timeout=TEMPERATURE_MAX_AGE)
 
     # prepare the response and store it on the DB 
-    response = make_response(prepare_response(utils.MSG_SUCCESS_DB, results, address, zipcode, country), 200)
+    response = make_response(prepare_response(utils.MSG_SUCCESS_DB, results, address, zipcode, country)[0], 200)
 
     # also set the http cache to 1 hour
     response.headers['Cache-Control'] = "max-age={}".format(

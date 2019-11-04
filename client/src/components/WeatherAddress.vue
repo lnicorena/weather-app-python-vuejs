@@ -57,21 +57,14 @@ export default {
             `/temperature?address=${this.encoded_address}`
         )
         .then(data => {
-          // console.log("then", data);
           if (data.data.status == "OK") {
             this.$emit("updateTemperatureBox", data.data.result);
             this.errorMessage = "";
           } else {
-            this.errorMessage = this.formatErrors(data.data.errors);
+            console.log("semething went wrong", data);
           }
         })
-        .catch(error => {
-          if (error.response && error.response.data.errors) {
-            this.errorMessage = this.formatErrors(error.response.data.errors);
-          } else {
-            this.errorMessage = this.formatErrors(error.message);
-          }
-        });
+        .catch(this.errorHandler);
     },
 
     getSuggestions() {
@@ -80,16 +73,18 @@ export default {
         .then(data => {
           if (data.data.status == "OK") {
             this.suggestions = data.data.result;
-          } else {
-            this.errorMessage = this.formatErrors(data.data.errors);
           }
         })
-        .catch(error => {
-          // console.log("error", error);
-          if (error.response && error.response.data.errors) {
-            this.errorMessage = this.formatErrors(error.response.data.errors);
-          }
-        });
+        .catch(this.errorHandler);
+    },
+
+    errorHandler(error) {
+      if (error.response && error.response.data.errors) {
+        this.errorMessage = this.formatErrors(error.response.data.errors);
+      } else {
+        this.errorMessage = this.formatErrors(error.message);
+      }
+      window.console.log("há!");
     },
 
     formatErrors(errors) {

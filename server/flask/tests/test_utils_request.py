@@ -29,7 +29,7 @@ class TestUtilsRequest(unittest.TestCase):
         }
         response = prepare_response(MSG_ERROR, expected_message)
         
-        self.assertEqual(json.loads(response.get_data(as_text=True)), expected)
+        self.assertEqual(json.loads(response[0].get_data(as_text=True)), expected)
 
     def test_call_success_message(self):
         data_obj = {
@@ -42,4 +42,4 @@ class TestUtilsRequest(unittest.TestCase):
         }
         response = prepare_response(MSG_SUCCESS, data_obj)
         
-        self.assertEqual(json.loads(response.get_data(as_text=True)), expected)
+        self.assertEqual(json.loads(response[0].get_data(as_text=True)), expected)

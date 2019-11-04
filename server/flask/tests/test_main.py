@@ -49,11 +49,19 @@ class TestMainApp(unittest.TestCase):
 
     # Test temperature endpoint
 
-    def test_temperatue_status(self):
-        response = self.app.get('/temperature?address=')
-        self.assertEqual(200, response.status_code)
+        
 
     def test_temperature_no_arguments(self):
+        response = self.app.get('/temperature')
+        expected = {
+            'status': 'error',
+            'errors': 'address param must be passed'
+        }
+        data = json.loads(response.get_data(as_text=True))
+        self.assertEqual(data, expected)
+        self.assertEqual(400, response.status_code)
+
+    def test_temperature_no_address_value(self):
         response = self.app.get('/temperature?address')
         expected = {
             'status': 'error',
@@ -61,14 +69,51 @@ class TestMainApp(unittest.TestCase):
         }
         data = json.loads(response.get_data(as_text=True))
         self.assertEqual(data, expected)
+        self.assertEqual(400, response.status_code)
+
+    def test_temperature_invalid_address_value(self):
+        response = self.app.get(
+            '/temperature?address=ABCDEFGH')
+        expected = {
+            'status': 'error',
+            'errors': 'google api error'
+        }
+        data = json.loads(response.get_data(as_text=True))
+        self.assertEqual(data, expected)
+        self.assertEqual(400, response.status_code)
+
+    def test_temperature_nozipcode_address_value(self):
+        response = self.app.get(
+            '/temperature?address=Florianopolis')
+        expected = {
+            'status': 'error',
+            'errors': 'invalid address: zipcode could not be found'
+        }
+        data = json.loads(response.get_data(as_text=True))
+        self.assertEqual(data, expected)
+        self.assertEqual(400, response.status_code)
+
+    def test_temperature_error_address_value(self):
+        response = self.app.get(
+            '/temperature?address=rua%%20dante%%20de%20patta,%%20florianopolis')
+        expected = {
+            'status': 'error',
+            'errors': 'open weather api did not found the location to give the temperature'
+        }
+        data = json.loads(response.get_data(as_text=True))
+        self.assertEqual(data, expected)
+        self.assertEqual(400, response.status_code)
+
 
     def test_temperature_response(self):
         response = self.app.get('/temperature?address={}'.format(quote('459 Broadway, New York')))
         data = json.loads(response.get_data(as_text=True))
         self.assertEqual(data['status'], "OK")
-
+        self.assertEqual(200, response.status_code)
+        
     def test_temperature_response_result(self):
         response = self.app.get('/temperature?address={}'.format(quote('459 Broadway, New York')))
         data = json.loads(response.get_data(as_text=True))
         self.assertEqual(data['result']['location'], 'New York, NY')
         self.assertEqual(type(data['result']['temperature']), type(70.0))
+        self.assertEqual(200, response.status_code)
