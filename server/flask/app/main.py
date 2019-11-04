@@ -1,15 +1,14 @@
 from app import app
-from app.database import DB
 from app.database import Searches
-from app.database import Temperatures
 from app.utils.request import prepare_response
 from app.utils import request as utils
 from app.utils import external as API
 from app.utils.caching import get_temperature_ttl
+from app.utils.caching import get_search_history
+from app.utils.caching import load_information_from_database
 from flask import jsonify
 from flask import request
 from flask import make_response
-from flask_sqlalchemy import SQLAlchemy
 import requests
 import os
 
@@ -31,23 +30,6 @@ def search():
     return prepare_response(utils.MSG_SUCCESS, result)
 
 
-def _get_search_history (address):
-    return DB.session.query(Searches).filter(Searches.address.ilike(address)).first()
-
-def _load_information_from_database(search_history_obj):
-    zipcode = search_history_obj.zipcode
-    country = search_history_obj.country
-
-    print(search_history_obj)
-    temp = DB.session.query(Temperatures).filter_by(zipcode=zipcode).first()
-    print (temp)
-    location_name = temp.value['location']
-    last_request = temp.last_request
-    temperature_value = temp.value
-
-    return zipcode, country, location_name, last_request, temperature_value
-
-
 
 @app.route('/temperature', methods=['GET'])
 def temperature():
@@ -58,7 +40,7 @@ def temperature():
         return prepare_response(utils.MSG_ERROR, 'address param must be passed')
     
     ## check DATABASE's search history for the given ADDRESS
-    history = _get_search_history(address)
+    history = get_search_history(address)
 
     ## if there is an address STORED on the DB
     if history:
@@ -66,8 +48,7 @@ def temperature():
         if history.valid == 1:
 
             # get the temperature's info from database
-            zipcode, country, location_name, last_request, temperature_value = _load_information_from_database(
-                history)
+            zipcode, country, location_name, last_request, temperature_value = load_information_from_database(history)
             
             # get the time that the temperature has to still be valid
             temperature_ttl = get_temperature_ttl(last_request)
@@ -111,7 +92,7 @@ def temperature():
     ## If the Temperature was NOT FOUND in the database or is OLDER than 1 HOUR, get it from external API
 
     # load open weather api response
-    wapi_requested = API.owapi_get_response(zipcode, country)
+    wapi_requested = API.wapi_get_response(zipcode, country)
     if not wapi_requested:
         return prepare_response(utils.MSG_ERROR_DB, 'open weather api did not found the location to give the temperature', address, zipcode, country)
 

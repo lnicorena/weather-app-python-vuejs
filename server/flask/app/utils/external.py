@@ -11,7 +11,7 @@ def gapi_get_response(address):
     return results['status'] == 'OK'
 
 
-def owapi_get_response(zipcode, country):
+def wapi_get_response(zipcode, country):
     global wapi_response
     # There is an open issue that doens't allow to search by zipcode from some places in other countries
     # https://openweathermap.desk.com/customer/portal/questions/17194531-search-by-zip-postal-code-not-working

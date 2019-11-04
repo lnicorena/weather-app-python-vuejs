@@ -1,0 +1,110 @@
+{
+    "results": [
+        {
+            "address_components": [
+                {
+                    "long_name": "459",
+                    "short_name": "459",
+                    "types": [
+                        "street_number"
+                    ]
+                },
+                {
+                    "long_name": "Broadway",
+                    "short_name": "Broadway",
+                    "types": [
+                        "route"
+                    ]
+                },
+                {
+                    "long_name": "Manhattan",
+                    "short_name": "Manhattan",
+                    "types": [
+                        "political",
+                        "sublocality",
+                        "sublocality_level_1"
+                    ]
+                },
+                {
+                    "long_name": "New York",
+                    "short_name": "New York",
+                    "types": [
+                        "locality",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "New York County",
+                    "short_name": "New York County",
+                    "types": [
+                        "administrative_area_level_2",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "New York",
+                    "short_name": "NY",
+                    "types": [
+                        "administrative_area_level_1",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "Estados Unidos",
+                    "short_name": "US",
+                    "types": [
+                        "country",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "10013",
+                    "short_name": "10013",
+                    "types": [
+                        "postal_code"
+                    ]
+                },
+                {
+                    "long_name": "3001",
+                    "short_name": "3001",
+                    "types": [
+                        "postal_code_suffix"
+                    ]
+                }
+            ],
+            "formatted_address": "459 Broadway, New York, NY 10013, EUA",
+            "geometry": {
+                "bounds": {
+                    "northeast": {
+                        "lat": 40.7210402,
+                        "lng": -74.00080919999999
+                    },
+                    "southwest": {
+                        "lat": 40.7207482,
+                        "lng": -74.00126379999999
+                    }
+                },
+                "location": {
+                    "lat": 40.7208592,
+                    "lng": -74.0009613
+                },
+                "location_type": "ROOFTOP",
+                "viewport": {
+                    "northeast": {
+                        "lat": 40.72224318029149,
+                        "lng": -73.99968751970849
+                    },
+                    "southwest": {
+                        "lat": 40.71954521970849,
+                        "lng": -74.00238548029149
+                    }
+                }
+            },
+            "place_id": "ChIJMUD804tZwokRP86xRPUpuEg",
+            "types": [
+                "premise"
+            ]
+        }
+    ],
+    "status": "OK"
+}
