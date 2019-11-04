@@ -2,7 +2,7 @@
 
 ### Vue.js SPA served over Flask and PostgreSQL
 
-Users can input an address and get the current temperature
+This application allow users to the current temperature for a place given an address. 
 
 ## Features
 
@@ -34,6 +34,9 @@ We have unit tests on the back-end and on the front-end. The front-end also have
 
 Follow the above instructions to get the app running.
 
+
+
+
 ## Front-end setup
 
 ``` bash
@@ -60,9 +63,7 @@ yarn test:e2e
 ## Back-end setup
 
 ``` bash
-
 # using docker-compose (recommended)
-
 cd server
 
 # build and run the containers (api will be available at: http://127.0.0.1:8081)
@@ -72,9 +73,7 @@ docker-compose up --build
 docker exec -it flask py.test
 
 
-
-# or you can start the app manually
-
+# or you can always start the backend manually
 cd server/flask
 
 # Create python virtual env 

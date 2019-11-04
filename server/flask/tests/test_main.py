@@ -1,4 +1,7 @@
 import unittest
+import sys
+import os
+sys.path.append('../app')
 from app import app
 import json
 from requests.utils import quote
