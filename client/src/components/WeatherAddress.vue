@@ -79,12 +79,11 @@ export default {
     },
 
     errorHandler(error) {
-      if (error.response && error.response.data.errors) {
+      if (error.response && error.response.data && error.response.data.errors) {
         this.errorMessage = this.formatErrors(error.response.data.errors);
       } else {
         this.errorMessage = this.formatErrors(error.message);
       }
-      window.console.log("há!");
     },
 
     formatErrors(errors) {
