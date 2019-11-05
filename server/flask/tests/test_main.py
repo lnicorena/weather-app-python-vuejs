@@ -95,7 +95,7 @@ class TestMainApp(unittest.TestCase):
 
     def test_temperature_error_address_value(self):
         response = self.app.get(
-            '/temperature?address=rua%%20dante%%20de%20patta,%%20florianopolis')
+            "/temperature?address=R. Dante de Patta, Ingleses, Florinópolis")
         expected = {
             'status': 'error',
             'errors': 'open weather api did not found the location to give the temperature'
@@ -115,5 +115,5 @@ class TestMainApp(unittest.TestCase):
         response = self.app.get('/temperature?address={}'.format(quote('459 Broadway, New York')))
         data = json.loads(response.get_data(as_text=True))
         self.assertEqual(data['result']['location'], 'New York, NY')
-        self.assertEqual(type(data['result']['temperature']), type(70.0))
+        self.assertIn(type(data['result']['temperature']), [type(70.0), type(70)],)
         self.assertEqual(200, response.status_code)
