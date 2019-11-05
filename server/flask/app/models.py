@@ -24,8 +24,9 @@ class Searches(DB.Model):
     # get the most recent 10 searches given an string to filter
     @classmethod
     def query(cls, val):
+        sanit_val = val.replace('%', '\\%').replace('_', '\_')
         history = DB.session.query(Searches).filter(Searches.address.ilike(
-            '%' + val + '%')).order_by(Searches.last_request.desc()).limit(10)
+            '%' + sanit_val + '%')).order_by(Searches.last_request.desc()).limit(10)
         result = []
         for h in history:
             result.append(h.address)

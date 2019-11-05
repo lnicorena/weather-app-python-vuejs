@@ -6,7 +6,7 @@ describe("General tests", () => {
     cy.get(".address-search-group").contains("show me the current temperature");
     cy.get(".address-search-group input").should("have.text", "");
 
-    let some_address = "R. Dante de Patta, Ingleses, Florinópolis";
+    let some_address = "R. Dante de Patta, Ingleses, Florianópolis";
     cy.get(".address-search-group input")
       .type(some_address)
       .should("have.value", some_address);

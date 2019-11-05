@@ -6,12 +6,12 @@
         v-model="address"
         :data="suggestions"
         :minMatchingChars="0"
-        @hit="getLocation()"
-        @keyup.enter.native="getLocation()"
+        @hit="getTemperature()"
+        @keyup.enter.native="getTemperature()"
       />
       <label class="text-danger small">{{ errorMessage }}</label>
     </b-form-group>
-    <b-button @click="getLocation()" block variant="success"
+    <b-button @click="getTemperature()" block variant="success"
       >show me the current temperature</b-button
     >
   </div>
@@ -50,33 +50,61 @@ export default {
     }
   },
   methods: {
-    getLocation() {
-      this.$axios
-        .get(
-          process.env.VUE_APP_API_URL +
-            `/temperature?address=${this.encoded_address}`
-        )
-        .then(data => {
-          if (data.data.status == "OK") {
-            this.$emit("updateTemperatureBox", data.data.result);
-            this.errorMessage = "";
-          } else {
-            console.log("semething went wrong", data);
-          }
-        })
-        .catch(this.errorHandler);
-    },
+    async getTemperature() {
+      try {
+        const { data } = await this.$axios.get(
+          `${process.env.VUE_APP_API_URL}/temperature?address=${this.encoded_address}`
+        );
+        if (data.status != "OK")
+          throw new Error("semething went wrong with the temperature call");
 
-    getSuggestions() {
-      this.$axios
-        .get(process.env.VUE_APP_API_URL + `/search?q=${this.address}`)
-        .then(data => {
-          if (data.data.status == "OK") {
-            this.suggestions = data.data.result;
-          }
-        })
-        .catch(this.errorHandler);
+        this.$emit("updateTemperatureBox", data.result);
+        this.errorMessage = "";
+      } catch (e) {
+        this.errorHandler(e);
+        window.console.error("Failure!", e);
+      }
     },
+    async getSuggestions() {
+      try {
+        const { data } = await this.$axios.get(
+          `${process.env.VUE_APP_API_URL}/search?q=${this.address}`
+        );
+        if (data.status != "OK")
+          throw new Error("semething went wrong with the search call");
+
+        this.suggestions = data.result;
+      } catch (e) {
+        this.errorHandler(e);
+        window.console.error("Failure!", e);
+      }
+    },
+    // getLocation() {
+    //   this.$axios
+    //     .get(
+    //       process.env.VUE_APP_API_URL +
+    //         `/temperature?address=${this.encoded_address}`
+    //     )
+    //     .then(data => {
+    //       if (data.data.status == "OK") {
+    //         this.$emit("updateTemperatureBox", data.data.result);
+    //         this.errorMessage = "";
+    //       } else {
+    //         console.log("semething went wrong", data);
+    //       }
+    //     })
+    //     .catch(this.errorHandler);
+    // },
+    // getSuggestions() {
+    //   this.$axios
+    //     .get(process.env.VUE_APP_API_URL + `/search?q=${this.address}`)
+    //     .then(data => {
+    //       if (data.data.status == "OK") {
+    //         this.suggestions = data.data.result;
+    //       }
+    //     })
+    //     .catch(this.errorHandler);
+    // },
 
     errorHandler(error) {
       if (error.response && error.response.data && error.response.data.errors) {

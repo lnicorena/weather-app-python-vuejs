@@ -95,7 +95,7 @@ class TestMainApp(unittest.TestCase):
 
     def test_temperature_error_address_value(self):
         response = self.app.get(
-            "/temperature?address=R. Dante de Patta, Ingleses, Florinópolis")
+            "/temperature?address=R. Dante de Patta, Ingleses, Florianópolis")
         expected = {
             'status': 'error',
             'errors': 'open weather api did not found the location to give the temperature'
